@@ -1,0 +1,47 @@
+server:
+  port: 8888
+
+spring:
+  main:
+    allow-bean-definition-overriding: true
+  application:
+    name: co2-monitoring-service
+  datasource:
+    url: jdbc:mysql://localhost:3306/co2
+    username: co2
+    password: Py6hCFRoZW6c
+    hikari:
+      connection-timeout: 10000
+      idle-timeout: 30000
+      max-lifetime: 1800000
+      minimum-idle: 10
+      maximum-pool-size: 50
+  jpa:
+    database: mysql
+    show_sql: false
+    open-in-view: false
+    hibernate:
+      ddl-auto: update
+  rabbitmq:
+    host: localhost
+    port: 5672
+    username: guest
+    password: guest
+    listener:
+      direct:
+        auto-startup: true
+
+management:
+  endpoint:
+    health:
+      enabled: true
+      show-details: always
+  endpoints:
+    web:
+      exposure:
+        include: '*'
+
+rabbitmq:
+  queue: measurement-log
+  exchange: co2-monitoring
+  routingkey: a-key
