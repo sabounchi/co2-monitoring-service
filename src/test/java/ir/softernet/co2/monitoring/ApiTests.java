@@ -5,7 +5,10 @@ import com.fasterxml.jackson.databind.ObjectWriter;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import ir.softernet.co2.monitoring.controller.v1.SensorControllerV1;
 import ir.softernet.co2.monitoring.dto.MeasurementsData;
+import ir.softernet.co2.monitoring.dto.SensorMetrics;
+import ir.softernet.co2.monitoring.dto.SensorStatus;
 import ir.softernet.co2.monitoring.exception.base.ResultCode;
+import ir.softernet.co2.monitoring.model.CO2Level;
 import ir.softernet.co2.monitoring.service.ResponseService;
 import ir.softernet.co2.monitoring.service.SensorService;
 import org.junit.Test;
@@ -16,11 +19,14 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 
+import java.util.ArrayList;
 import java.util.Date;
 
 import static org.mockito.Mockito.doCallRealMethod;
 import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.when;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -39,7 +45,7 @@ public class ApiTests {
 
 
     @Test
-    public void shouldReturn200HttpStatusCode() throws Exception {
+    public void shouldCollectReturn200HttpStatusCode() throws Exception {
         final String sensorUUID = "test";
         final MeasurementsData measurementsData = new MeasurementsData();
         measurementsData.setCo2(1700);
@@ -58,5 +64,38 @@ public class ApiTests {
                         .contentType(APPLICATION_JSON)
                         .content(requestJson)
         ).andExpect(status().is2xxSuccessful());
+    }
+
+    @Test
+    public void shouldSensorStatusReturn200HttpStatusCode() throws Exception {
+        final String sensorUUID = "test";
+
+        when(sensorService.status(sensorUUID)).thenReturn(new SensorStatus(CO2Level.OK));
+        doCallRealMethod().when(responseService).of(ResultCode.OK);
+
+        mockMvc.perform(get("/api/v1/sensors/" + sensorUUID))
+                .andExpect(status().is2xxSuccessful());
+    }
+
+    @Test
+    public void shouldSensorMetricsReturn200HttpStatusCode() throws Exception {
+        final String sensorUUID = "test";
+
+        when(sensorService.metrics(sensorUUID)).thenReturn(new SensorMetrics());
+        doCallRealMethod().when(responseService).of(ResultCode.OK);
+
+        mockMvc.perform(get("/api/v1/sensors/" + sensorUUID + "/metrics"))
+                .andExpect(status().is2xxSuccessful());
+    }
+
+    @Test
+    public void shouldAlertsReturn200HttpStatusCode() throws Exception {
+        final String sensorUUID = "test";
+
+        when(sensorService.alerts(sensorUUID)).thenReturn(new ArrayList<>());
+        doCallRealMethod().when(responseService).of(ResultCode.OK);
+
+        mockMvc.perform(get("/api/v1/sensors/" + sensorUUID + "/alerts"))
+                .andExpect(status().is2xxSuccessful());
     }
 }

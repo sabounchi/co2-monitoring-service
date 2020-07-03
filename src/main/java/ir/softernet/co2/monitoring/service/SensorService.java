@@ -45,7 +45,7 @@ public class SensorService {
      * @param data data from sensor, contains CO2 amount and time of measurement
      * @throws AnException
      */
-    public void collect(String uuid, MeasurementsData data) throws AnException {
+    public void collect(String uuid, MeasurementsData data) {
         rabbitMQSenderService.send(of(uuid, data));
     }
 
@@ -71,7 +71,7 @@ public class SensorService {
      * @return Maximum and Average CO2 amount of specific sensor
      * @throws AnException
      */
-    public SensorMetrics metrics(String uuid) throws AnException {
+    public SensorMetrics metrics(String uuid) {
         final Calendar calendar = Calendar.getInstance();
         calendar.add(Calendar.DAY_OF_YEAR, -30);//30 Days before
 
@@ -90,7 +90,7 @@ public class SensorService {
      * @throws AnException
      */
     @Transactional
-    public List<AlertEntry> alerts(String uuid) throws AnException {
+    public List<AlertEntry> alerts(String uuid) {
         return statusRepository.findAllByUuidAndLevelOrderByIdDesc(uuid, CO2Level.ALERT)
                 .filter(status -> status.getMeasurementLogs().size()==3)
                 .map(item -> {
